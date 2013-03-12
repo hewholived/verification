@@ -1,0 +1,48 @@
+\documentclass[9pt]{article}
+\input{macros}
+
+\newcommand{\constr}{\ensuremath{\psi}}
+\newcommand{\marketplace}{\ensuremath{\mathbb{Q}^{\star}}}
+
+\title{\textbf{Logical Qualifier Inference for \lang}}
+\author{Madhukar N Kedlaya \andalso
+		Vineeth Kashyap}
+\date{} 
+\usepackage{amsmath}
+\usepackage{url}
+\usepackage{amssymb}
+\usepackage{float}
+\usepackage{amsthm}
+\usepackage{centernot}
+
+
+\floatstyle{boxed} 
+\restylefloat{figure}
+
+
+\begin{document}
+
+\maketitle
+
+\input{abstract}
+
+\input{introduction}
+
+\input{language}
+
+\input{theory}
+
+\input{rules}
+
+\input{implementation}
+
+\input{results}
+
+\section{Comparison with Liquid Types}
+Our work is inspired by the \emph{Liquid Types} proposed by Rondon et al\cite{Rondon2008} for OCAML language. Our implementation differs from the original implementation for OCAML in three ways. First, we use abstract interpretation for performing logical qualifier inference, whereas the original implementation uses a type system formulation to infer the dependent types which have logical qualifiers. Second, we implement our logical qualifier inference system for \lang which unlike OCAML, \lang allows mutability and therefore offers a different set of challenges that need to be considered. Third, unlike the original implementation which was flow insensitive, our implementation is flow sensitive and we infer logical qualifiers at every point in the program.
+
+\input{conclusion}
+
+\bibliography{paper.bib}{}
+\bibliographystyle{plain}
+\end{document}

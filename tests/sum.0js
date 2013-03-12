@@ -1,0 +1,11 @@
+//sum of first 10 integers
+var inp, out, counter in
+  
+  inp := 10;
+  counter := 1;
+  out := 0;
+  
+  while(inp != counter) {
+    out := out + counter;
+    counter := counter + 1
+  }

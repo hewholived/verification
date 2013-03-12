@@ -1,0 +1,130 @@
+\section{Introduction}
+
+
+Program invariants are logical predicates on program variables and constants, that hold on all possible runs of the program, irrespective of what inputs are provided to the program.
+Finding program invariants can be very useful for a variety of purposes. 
+For example, a number of developers use program assertions to make sure certain properties are not violated at certain program points.
+This allows them to reason about code in a modular fashion, that is, one can assume that an assertion holds at a particular point in the program, and write the rest of the program with the assumption in mind. 
+
+Finding program invariants could also have potential applications in program optimizations. 
+Say that we are able to prove that an integer variable is definitely greater than 0.
+Then it can be allocated in an \code{unsigned\ int} by the compiler.
+Or if we are able to prove that an integer variable is definitely between 0 and 255, then it can be allocated in an \code{unsigned\ char} by the compiler.
+Certain program invariants could also help eliminate dead code in a number of places.
+For example, proving the invariant \code{p != 0} at a branch conditional which checks for \code{p != 0} can help ascertain that the \code{else} branch will definitely not be taken.
+This would allow the compiler to generate straight line code instead of a branch.
+
+We are interested in statically inferring program invariants. 
+With such an exercise, intractability lurks at every step, and therefore, such an analysis should be designed very carefully.
+In general, proving all kinds of assertions automatically is not possible without programmer help (which is what interactive theorem provers like Coq \cite{Coq} are for).
+Thus, we limit ourselves to inferring program invariants of a certain kind, called logical qualifiers, which is a term we are using from Liquid Types \cite{Rondon2008}.
+
+Let us dive into an example that can show what our tool can do.
+Consider the following program in the \lang shown in Figure~\ref{fig:sum}.
+\begin{figure}
+\begin{verbatim}
+var sum, p, final in
+  sum := 0;
+  p := 10;
+  while (p > 0) {
+    sum := sum + (p * p);
+    p := p - 1;
+  }
+  final := sum - p;
+  assert(p = 0)   
+\end{verbatim}
+\caption{A program in \lang that calculates the sum of first 10 squares}
+\label{fig:sum}
+\end{figure}
+By running our tool, we can infer that the following invariants hold at the end of the program: \code{sum > 0}, \code{sum > p}, \code{final >= sum}, \code{final > 0}, \code{final > p}. We can also prove the programmer assertion \code{p = 0}.
+If we manually reason about the code, we can see for ourselves that each of these invariants do in fact hold, and the assertion will pass.
+
+In order to test our tool, we came up with a test suite with various programs in \lang, that we could infer interesting invariants from (some of these were taken from DART \cite{Godefroid2005} and CUTE \cite{Sen2005}).
+While doing this, we wrote code shown in Figure~\ref{fig:fact-wrong}, for calculating factorial of a number.
+Our tool however, invalidated the program assertion! 
+\begin{figure}
+\begin{verbatim}
+var n, fact in
+  if (n > 0) {
+    fact := n;
+    while (n > 0) {
+      fact := fact * (n - 1);
+      n := n - 1;
+    }
+  } else {
+    fact := 1
+  };  
+  assert(fact > 0)   
+\end{verbatim}
+\caption{A program in \lang that calculates factorial of a number, but has a bug}
+\label{fig:fact-wrong}
+\end{figure}
+
+Looking carefully, we found a bug in this code (which any reasonable unit test suite would have found too, but we can find it without running any test cases).
+The correct version of the program calculating factorial of a number is given in Figure~\ref{fig:fact-correct}.
+\begin{figure}
+\begin{verbatim}
+var n, fact in
+  if (n > 0) {
+    fact := n;
+    while (n > 1) {
+      fact := fact * (n - 1);
+      n := n - 1;
+    }
+  } else {
+    fact := 1
+  };  
+  assert(fact > 0)   
+\end{verbatim}
+\caption{A program in \lang that calculates factorial of a number, with the bug in Figure~\ref{fig:fact-wrong} fixed}
+\label{fig:fact-correct}
+\end{figure}
+The fix was to change the condition in the while loop from \code{n > 0} to \code{n > 1} (the bug caused \code{fact} to be always 0).
+After making the fix, our tool was able to prove the assertion.
+Thus, we can say that for any integer input value for \code{n}, \code{fact > 0}.
+
+In the rest of the paper, we describe how our tool works.
+
+\section{Brief Overview of Our Tool}
+
+\paragraph{Logical Qualifiers}
+A logical qualifier is used to describe a value using some predicates.
+We write a logical qualifier in the form \av{}{}, and it is read as the set of values $v$ such that the predicate $\psi(v)$ holds.
+For the rest of the paper, we assume that the domain of discourse for values is the set of all integers.
+The Table~\ref{tab:lqs} shows some examples of logical qualifiers and the values they describe.
+Note that we only allow the conjunction of simple logical formulae, and no disjunctions.
+That is, the simple logical formulae should be of the form $v\ \odot\ e$ (or \textit{true} or \textit{false}), where $v$ is the integer value on which the predicate is being defined, $\odot$ is a relational operator, and $e$ is any expression in the language \lang.
+A logical qualifier is the conjunction of such simple logical formulae.
+Thus, for example, $\{ v\ |\ v = 0\ \lor\ v = 1\}$ is not a valid logical qualifier.
+
+\paragraph{Input and Output to the Tool}
+Our tool takes as input, a program written in \lang, as well a finite set of logical qualifiers, and infers at each program point and for each variable, the set of logical qualifiers that hold.
+In the current implementation, we have fixed the set of simple logical formulae that make up the logical qualifiers that are inferred.
+In particular, we use \{ $v >= 0$, $v <= 0$, $v = 0$, $v > *$, $v < *$, $v >= *$ \}, although this can be easily changed.
+Here we use $*$ as a place holder for all the variables that are in scope.
+One can also write \code{assert} statements, and we print whether we were able to prove it.
+In case we fail to prove it, either the assertion does not hold, or logical qualifier set is insufficient to prove it.
+
+\begin{table}
+\begin{center}
+    \begin{tabular}{ | l | l | }
+    \hline
+    \textbf{Logical Qualifier} & \textbf{What it means}  \\
+    \hline
+    $\{ v\ |\ \textit{true}\}$ & Set of all integers \\
+    \hline
+    $\{ v\ |\ \textit{false}\}$ & Empty set \\
+    \hline
+    $\{ v\ |\ v > 0\}$ & Set of all positive integers \\
+    \hline
+    $\{ v\ |\ v > 0\ \land \ v < 10 \}$ & Set of all integers between 0 and 10 \\
+    \hline
+    $\{ v\ |\ v > x\}$ & Set of all integers greater than the current value of $x$ \\
+    \hline
+    \end{tabular}
+\end{center}
+\caption{Examples of a few logical qualifiers and what they describe}
+\label{tab:lqs}
+\end{table}
+
+

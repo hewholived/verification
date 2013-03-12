@@ -1,0 +1,15 @@
+//factorial
+var inp, fact in
+  
+  if (inp > 0) {
+    fact := inp;
+  
+    while(inp > 1) {
+      fact := fact * (inp - 1);
+      inp := inp - 1
+    }
+  } else {
+    fact := 1
+  };
+  
+  assert(fact > 0)

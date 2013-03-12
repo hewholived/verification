@@ -1,0 +1,138 @@
+\documentclass[9pt]{article}
+%Gummi|063|=)
+\input{macros}
+
+\newcommand{\constr}{\ensuremath{\psi}}
+\newcommand{\marketplace}{\ensuremath{\mathbb{Q}^{\star}}}
+\title{\textbf{Logical Qualifier Inference for \lang}}
+\author{Madhukar N Kedlaya\\
+		Vineeth Kashyap}
+\date{} 
+\usepackage{amsmath}
+\usepackage{url}
+\usepackage{amssymb}
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+In our project, we infer \textit{Logical Qualifiers} for variables in a program written in an imperative language called \lang. Our work is inspired by the \textit{Liquid Types} proposed by Rondon et al\cite{Rondon2008} for OCAML language. We use abstract interpretation and \textit{Predicate Abstraction} for automatically inferring logical qualifiers for program variables. These logical qualifiers can be used to prove certain safety properties for the input program. We use \textit{Z3} theorem prover\cite{Z3} for solving constraints.
+
+Our implementation differs from the original implementation for OCAML in three ways. First, we use abstract interpretation for performing logical qualifier inference, whereas the original implementation uses \textit{Hindley-Milner} Type Inference to infer types of the subexpressions. Second, we implement our logical qualifier inference system for \lang which unlike OCAML, \lang allows mutability and therefore offers a different set of challenges that need to be considered. Third, unlike the original implementation which was flow insensitive, our implementation is flow sensitive and we infer logical qualifiers at every point in the program.
+
+\section{\lang}
+
+\lang is an imperative language which has integers, variables, sequencing, \textit{let} block for introducing new variables in a scope, binary operators (+, - and \ensuremath{\times}), assignment statements and \textit{if} and \textit{while} as control flow constructs. Figure 1 describes the abstract syntax of the language.\\
+\framed[]{
+  \begin{align*}
+    e \in \Exp &::= n \alt x \alt \seq \alt \block \alt e_1 \bop e_2\\
+    &\lalt  \cond \alt \while\\
+    &\lalt x := e 
+    \\
+    \bop \in \BinOp &::= + \alt - \alt \times
+  \end{align*}
+}
+\begin{center}\textbf{Figure 1. Abstract syntax of \lang}\end{center}
+
+\section{Setup}
+We implement our abstract interpreter in \textit{Scala} programming language. Scala is a JVM based multi-paradigm language which compiles down to Java class files. Therefore, our tool can run on any machine that has JVM and Z3 installed in it. We use \textit{ScalaZ3}\cite{ScalaZ3}, Scala binding for the \textit{Z3} theorem prover, in our tool for solving constraints. We also require \textit{GMP}, GNU Multiple Precision Arithmetic Library installed in our system as an added dependency for Z3.
+
+\section{Methodology}
+We define \textit{logical qualifier} as a predicate over special value variable \textit{v} and a placeholder variable \ensuremath{\star} which can be replaced by any program variable in the current scope. We use \ensuremath{\mathbb{Q} = \{v = 0, v > 0, v \geq 0, v < 0, v \leq 0, v \geq \star, \star \geq v\}} as the set of \textit{logical qualifiers} that we use to describe the abstract value of a variable. This set can be expanded to improve precision. We now describe our abstract interpreter based on the following lattice structure.
+\begin{description}
+\item[Elements]
+Each element in the lattice is of the form \ensuremath{\{v\ | e\}} where \textit{v} is a \textit{value variable} and \textit{e} is a \textit{refinement predicate} over the value variable. A refinement predicate is a conjunction over set of \textit{logical qualifiers}.
+\item[\ensuremath{\top}] 
+Top element of the lattice is the most precise abstract value possible which is \ensuremath{\{v\ |\ False\}}.
+\item[\ensuremath{\bot}]
+Bottom element of the lattice is the least precise abstract value possible which is \ensuremath{\{v\ |\ True\}}.
+\item[\ensuremath{\sqsubseteq}]
+The ordering relation between the lattice elements is reverse implication, \ensuremath{\Leftarrow}. 
+\end{description}
+
+We define abstract value as a tuple \ensuremath{\{v\ |\ \constr(v)\}}, where \textit{v} is an unique variable name for a particular program location and position and $\constr(v)$ is constraint associated with the variable. We define \marketplace, a set of logical qualifiers where every \ensuremath{\star} in \ensuremath{\mathbb{Q}} is replaced by program variables in current scope. We refine the abstract value associated with the variable using the following rules.
+\begin{description}
+
+
+\item[Let block rule:]
+Initialize the abstract values of all the variables introduced in the let block to \ensuremath{\bot}, i.e. \ensuremath{\{v\ |\ \textit{True}\}} and update the store with these mappings. Update \marketplace with the new set of logical qualifiers corresponding to each of the newly introduced variables.
+
+
+\item[Constant rule:]
+Any constant integer \textit{I} has an abstract value \ensuremath{\{v\ |\ v=I\}}.
+
+
+\item[Variable rule:]
+Lookup most recent abstract value of the variable from the store.
+
+
+\item[Assign rule:]
+For any assignment of the form \ensuremath{x := e}\ first evaluate \textit{e} to an abstract value $\{v\ |\ \constr(v)\}$. Then refine the abstract value of variable \textit{x} using the following algorithm.
+\begin{enumerate}
+\item
+Assume \ensuremath{\alpha} equals $(x_1 = v) \wedge \constr(v)$, where $x_1$ is a unique variable name associated with \textit{x} at the given program location.
+\item
+For each logical qualifier \ensuremath{\beta} in \marketplace, check whether \ensuremath{\alpha \implies \beta[v\mapsto x_1]} is valid and filter out the ones that invalidate the formula into a set $\Sigma$.
+\item
+Create a new abstract value $\{x_1\ |\ \constr(x_1)\}$ for \textit{x}, where $\constr(x_1)$ is the conjunction of all the logical qualifiers in $\Sigma$. Update the store with this new value.
+\end{enumerate}
+
+
+\item[Binary operator rule:]
+For any binary operation of the form \ensuremath{e_1 \bop e_2}, evaluate $e_1$ and $e_2$ to $\{v_1\ |\ \constr(v_1)\}$ and $\{v_2\ |\ \constr(v_2)\}$. Create a new abstract value $\{v_3\ |\ \constr(v_3)\}$ using the following algorithm.
+\begin{enumerate}
+\item
+Assume $\alpha$ equals $\constr(v_1) \logand \constr(v_2) \logand (v_3 = v_1 \bop v_2)$.
+\item
+For each logical qualifier \ensuremath{\beta} in \marketplace, check whether \ensuremath{\alpha \implies \beta[v\mapsto v_3]} is valid and filter out the ones that invalidate the formula into a set $\Sigma$.
+\item
+Create a new abstract value $\{v_3\ |\ \constr(v_3)\}$, where $v_3$ is fresh variable name, $\constr(v_3)$ is the conjunction of all the logical qualifiers in $\Sigma$.
+\end{enumerate}
+
+
+\item[If rule:] First, define a helper function \textit{join} as follows. 
+
+\begin{center}$join(\{v_i\ |\ \constr(v_i)\},\ \{v_j\ |\ \constr(v_j)\},\ \marketplace) = \{v_k\ |\ \constr(v_k)\}$\end{center}
+where 
+\begin{itemize}
+\item
+$v_k$ is a fresh variable.
+\item
+$\constr(v_k)$ is conjunction of all the logical qualifiers from $\marketplace$ which satisfy $f(\beta) \Rightarrow ((v_k = v_i)\ \logand\ (v_k = v_j)\ \logand\ \constr(v_i)\ \logand\ \constr(v_j)\implies \beta[v\mapsto v_k])$.
+\end{itemize}
+For an $if$ expression of the format $if\ e_1\ then\ e_2\ else\ e_3\ $, use the following algorithm to evaluate it to an abstract value $\{v_0\ |\ \constr(v_0)\}$.
+\begin{enumerate}
+\item
+Evaluate $e_1$ to an abstract value $\{v_1\ |\ \constr(v_1)\}$. 
+\item
+Evaluate $e_2$ in an environment extended with $\constr(v_1)$ as an additional constraint to get back $\{v_2\ |\ \constr(v_2)\}$.
+\item
+Evaluate $e_3$ in an environment extended with $!\constr(v_1)$ as an additional constraint to get back $\{v_3\ |\ \constr(v_3)\}$.
+\item
+Perform $join(\{v_2\ |\ \constr(v_2)\}, \{v_3\ |\ \constr(v_3)\}, \marketplace)$ to get back $\{v_0\ |\ \constr(v_0)\}$.
+\item
+Merge the two stores from $e_2$ and $e_3$ to get logically qualified values for each of the variables using the \textit{join} function.
+\end{enumerate}
+\end{description}
+
+\section{Constraint Language: CL}
+We came up with a constraint language, CL that can easily interface with Z3 theorem prover. Our constraint language abstract syntax is described in Figure 2. To prove $\alpha \implies \beta$, we first see whether $\neg(\alpha \implies \beta)$ is satisfiable for any set of assignments of value to variables in $\alpha$ or $\beta$. If it is, we infer that $\alpha \implies \beta$ is false, if not it is true.
+\framed[]{
+  \begin{align*}
+    a \in \textit{AExp} &::= n \alt x \alt a_1 \bop a_2
+    \\
+    b \in \textit{BExp} &::= \true \alt \false \alt b_1 \otimes b_2 \alt a_1 \ominus a_2 \alt \textit{!b}
+    \\
+    \bop \in \textit{ABinOp} &::= + \alt - \alt \times\\
+    \otimes \in \textit{BBinOp} &::= \logand \alt \logor \alt \implies\\
+    \ominus \in \textit{ACompOp} &::=\ < \alt \leq \alt > \alt \geq \alt \equiv \alt \neq
+  \end{align*}
+}
+\begin{center}\textbf{Figure 2. Abstract syntax of CL}\end{center}
+\section{Progress}
+\input{progress}
+
+\bibliography{paper.bib}{}
+\bibliographystyle{plain}
+\end{document}

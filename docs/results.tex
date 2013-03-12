@@ -1,0 +1,26 @@
+\section{Results}
+We tested our tool extensively using our own test cases and a few from the slides on CUTE and DART. We were able to prove all the assertions that the other tools claimed to prove. Some of the tests that were run are described in Table~\ref{tab:tests}.
+\begin{table}
+\begin{center}
+\begin{tabular}{|c|p{3cm}|p{3cm}|c|}
+\hline
+	Test & Description & Result & Time taken (s)\\
+\hline
+	fact.0js & Calculates factorial of a given number n. & factorial $>$ 0 $\logand$ factorial $\ge$ input assertions passed. & 0.92\\
+\hline
+	fibo.0js & Calculates first n fibonacci numbers. & fibo $>$ 0 assertions passed.& 1.34\\
+\hline
+	max.0js & Gives the maximum of two numbers n1 \& n2. & max $\ge$ n1 $\logand$ max $\ge$ n2 assertions passed.& 0.79\\
+\hline
+	dart1.0js & First simple C example given in DART slides. & Proved that we can reach a bad state. & 0.65\\
+\hline
+	dart2.0js & C program with non-linear arithmetic from DART slides. & Due to our theory for multiplication we were able to analyse the whole program without getting stuck and proved that we can reach a bad state. & 0.71\\
+\hline
+	cute.0js & C program with non-linear arithmetic from CUTE slides. & Due to our theory for multiplication we were able to analyse the whole program without getting stuck and proved that we can reach a bad state.& 0.7\\
+\hline
+\end{tabular}
+\end{center}
+\caption{Tests and results.}
+\label{tab:tests}
+\end{table}
+

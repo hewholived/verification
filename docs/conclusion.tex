@@ -1,0 +1,9 @@
+\section{Conclusion and Future Work}
+
+We have presented a static analysis that infers logical qualifiers for programs written in \lang, that helps us prove interesting assertions in a crafted benchmark. 
+This involved framing the abstract domain and computable abstract semantics for the abstract interpreter.
+We implemented the tool in Scala, and used Z3 for discharging implications required for the different abstract semantics operations.
+Since Z3 does not handle multiplication efficiently, we implemented a simple theory of multiplication for the specific set of logical qualifiers we used in our benchmark programs.
+
+For future work, we would like to extend the language with various interesting features, like procedures, pointers, dynamic memory allocation etc., and experiment with how this affects the analysis.
+We would also like to add new types to the language, like strings, booleans, objects etc.

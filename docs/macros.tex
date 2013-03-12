@@ -1,0 +1,208 @@
+\usepackage{bcprules}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage[mathscr]{eucal}
+\usepackage{stmaryrd}
+\usepackage{xspace}
+\usepackage{mathrsfs}
+\usepackage{txfonts}
+\usepackage{array}
+\usepackage{xargs}
+\usepackage[figuresleft]{rotating}
+\usepackage{color}
+\usepackage{mdframed}
+\usepackage{verbatim}
+
+%% misc
+\newcommand{\alt}{\ \mid\ }
+\newcommand{\lalt}{\ \ \ \alt}
+\newcommand{\anywhere}[1]{\ensuremath{\mbox{#1}}}
+\newcommand{\kw}[1]{\anywhere{\sffamily{\bfseries\small {#1}}}}
+\newcommand{\red}[1]{{\color{red}{#1}}}
+\newcommand{\blue}[1]{{\color{blue}{#1}}}
+\newcommand{\green}[1]{{\color{green}{#1}}}
+\newcommand{\note}[1]{\red{\textbf{#1}}}
+\newcommand{\ignore}[1]{}
+\newcommand{\ulist}[1]{\begin{itemize} #1 \end{itemize}}
+\newcommand{\vsp}{\vspace{.1in}}
+\newcommand{\nvsp}{\vspace{-.1in}}
+\newcommandx{\framed}[2][1=\nvsp\nvsp]{\begin{mdframed}#1 #2 \nvsp\nvsp\end{mdframed}}
+%\newcommandx{\framed}[2][1=\nvsp\nvsp]{#2}
+\newcommand{\say}{\vsp\vsp\noindent}
+
+%% fonts
+\newcommand{\mtt}[1]{\ensuremath{\mathit{#1}}}
+\newcommand{\mrm}[1]{\ensuremath{\mathrm{#1}}}
+\newcommand{\ttt}[1]{\ensuremath{\mbox{\small \texttt{#1}}}}
+
+%% syntactic domains
+\newcommand{\lang}{\ensuremath{\mathtt{\lambda}_{\mathtt{imp}}}\xspace}
+\newcommand{\Int}{\ensuremath{\mathbb{Z}}\xspace}
+\newcommand{\Num}{\ensuremath{\mtt{Num}}\xspace}
+\newcommand{\Label}{\ensuremath{\mtt{Label}}\xspace}
+\newcommand{\Bool}{\ensuremath{\mtt{Bool}}\xspace}
+\newcommand{\String}{\ensuremath{\mtt{String}}\xspace}
+\newcommand{\Variable}{\ensuremath{\mtt{Variable}}\xspace}
+\newcommand{\UnOp}{\ensuremath{\mtt{UnOp}}\xspace}
+\newcommand{\BinOp}{\ensuremath{\mtt{BinOp}}\xspace}
+\newcommand{\Exp}{\ensuremath{\mtt{Exp}}\xspace}
+\newcommand{\Cmd}{\ensuremath{\mtt{Cmd}}\xspace}
+\newcommand{\Prog}{\ensuremath{\mtt{Program}}\xspace}
+\newcommand{\IType}{\ensuremath{\mtt{InputType}}\xspace}
+\newcommand{\Term}{\ensuremath{\mtt{Term}}\xspace}
+\newcommand{\Obj}{\ensuremath{\mtt{Object}}\xspace}
+
+%% binary operators
+\newcommand{\bop}{\ensuremath{\oplus}}
+\newcommand{\logand}{\ensuremath{\land}}
+\newcommand{\logor}{\ensuremath{\lor}}
+\newcommand{\shl}{\ensuremath{<<}}
+\newcommand{\shr}{\ensuremath{>>}}
+\newcommand{\shru}{\ensuremath{>>>}}
+\newcommand{\binxor}{\ensuremath{\kw{xor}}\xspace}
+\newcommand{\binand}{\ensuremath{\kw{and}}\xspace}
+\newcommand{\binor}{\ensuremath{\kw{or}}\xspace}
+\newcommand{\charAtKW}{\ensuremath{\kw{charAt}}\xspace}
+
+%% unary operators
+\newcommand{\uop}{\ensuremath{\odot}}
+\newcommand{\floor}{\ensuremath{\kw{floor}}\xspace}
+\newcommand{\lognot}{\ensuremath{\kw{not}}\xspace}
+\newcommand{\binnot}{\ensuremath{\neg}}
+\newcommand{\lengthKW}{\ensuremath{\kw{length}}\xspace}
+\newcommand{\keysKW}{\ensuremath{\kw{keys}}\xspace}
+\newcommand{\typeofKW}{\ensuremath{\kw{typeof}}\xspace}
+\newcommand{\numToStringKW}{\ensuremath{\kw{numToString}}\xspace}
+\newcommand{\stringToNumKW}{\ensuremath{\kw{stringToNum}}\xspace}
+\newcommand{\hasOwnPropertyKW}{\ensuremath{\kw{hasOwnProperty}}\xspace}
+
+%% syntactic objects
+\newcommand{\set}[1]{\ensuremath{\overrightarrow{#1}}}
+\newcommandx{\seq}[1][1=e]{\ensuremath{\vec{#1}}}
+\newcommandx{\while}[2][1=e_1, 2=e_2]{\ensuremath{\kw{while }#1\; #2}}
+\newcommandx{\trycatch}[4][1=e_1, 2=x, 3=e_2, 4=e_3]{\ensuremath{\kw{try }#1 \kw{ catch }#2 \; #3 \kw{ finally }#4}}
+\newcommandx{\brk}[2][1=l, 2=e]{\ensuremath{\kw{brk }#1 \; #2}}
+\newcommandx{\lbl}[2][1=l, 2=e]{#1 \; #2}
+\newcommandx{\throw}[1][1=e]{\ensuremath{\kw{throw }#1}}
+\newcommandx{\funcallSyn}[2][1=e_1, 2=\vec{e_2}]{#1(#2)}
+\newcommandx{\funcallSynCode}[3][1=e_1, 2=e_2, 2=\vec{e_3}]{#1.#2(#3)}
+\newcommandx{\methcallSyn}[2][1=e_1, 2=\vec{e_2}]{#1(#2)}
+\newcommandx{\evalSyn}[1][1=e]{\ensuremath{\kw{eval }#1}}
+\newcommand{\object}{\ensuremath{\ttt{Object}}\xspace}
+\newcommand{\window}{\ensuremath{\ttt{window}}\xspace}
+\newcommandx{\cond}[3][1=e_1, 2=e_2, 3=e_3, usedefault]{\ensuremath{\kw{if }#1\; #2\kw{ else } #3}}
+\newcommandx{\fun}[3][1=f, 2=\vec{x}, 3=e, usedefault]{\ensuremath{#1(#2) \to #3}}
+\newcommand{\str}{\ensuremath{\mtt{str}}\xspace}
+\newcommand{\unit}{\kw{unit}\xspace}
+\newcommand{\undefinedv}{\kw{undef}\xspace}
+\newcommand{\nullv}{\kw{null}\xspace}
+\newcommand{\true}{\kw{true}\xspace}
+\newcommand{\false}{\kw{false}\xspace}
+\newcommandx{\inpt}[1][1=\typ]{\ensuremath{\kw{input }#1}}
+\newcommand{\out}[1][e]{\ensuremath{\kw{output }#1}}
+\newcommand{\dvar}[1][\vec{x}]{\ensuremath{\kw{var }#1}}
+\newcommandx{\block}[2][1=\dvar, 2=e]{\ensuremath{\dvar\kw{ in }#2}}
+\newcommand{\typ}{\ensuremath{\mtt{typ}}}
+\newcommand{\obj}[1]{\ensuremath{\left\{#1\right\}}}
+\newcommand{\method}[1][e]{\ensuremath{(\self, \vec{x}) \to #1}}
+\newcommand{\self}{\ttt{self}\xspace}
+\newcommandx{\del}[1][1=e_1.e_2]{\kw{del }#1\xspace}
+
+%% semantic domains
+\newcommand{\Env}{\ensuremath{\mtt{Env}}\xspace}
+\newcommand{\Store}{\ensuremath{\mtt{Store}}\xspace}
+\newcommand{\BaseValue}{\ensuremath{\mtt{BaseValue}}\xspace}
+\newcommand{\JumpValue}{\ensuremath{\mtt{JumpValue}}\xspace}
+\newcommand{\FEIValue}{\ensuremath{\mtt{FEIValue}}\xspace}
+\newcommand{\FEOValue}{\ensuremath{\mtt{FEOValue}}\xspace}
+\newcommand{\Value}{\ensuremath{\mtt{Value}}\xspace}
+\newcommand{\Addr}{\ensuremath{\mtt{Address}}\xspace}
+\newcommand{\Conf}{\ensuremath{\mtt{Config}}\xspace}
+\newcommand{\Closure}{\ensuremath{\mtt{Closure}}\xspace}
+\newcommand{\List}{\ensuremath{\mtt{List}}\xspace}
+
+%% semantic objects
+\newcommand{\conf}{\ensuremath{\mathcal{C}}}
+\newcommand{\env}{\ensuremath{\rho}}
+\newcommand{\EA}{\ensuremath{\Gamma}\xspace}
+\newcommand{\store}{\ensuremath{\sigma}}
+\newcommand{\eval}{\ensuremath{\Rightarrow}}
+\newcommandx{\tup}[3][1=e, 2=\env, 3=\store, usedefault]{\ensuremath{\llbracket #1 \rrbracket #2 #3}}
+\newcommandx{\res}[2][1=v, 2=\store_1, usedefault]{\pair{#1}{#2}}
+\newcommand{\dom}{\ensuremath{\mtt{dom}}\xspace}
+\newcommand{\init}{\ensuremath{\ttt{inject}}\xspace}
+\newcommand{\clo}{\ensuremath{\mtt{clo}}\xspace}
+\newcommandx{\clot}[2][1=\env, 2=\fun, usedefault]{\ensuremath{#1 \cdot #2}}
+\newcommand{\alloc}{\ensuremath{\ttt{alloc}}\xspace}
+\newcommand{\allocObj}{\ensuremath{\ttt{allocObj}}\xspace}
+\newcommand{\proto}{\ensuremath{\ttt{lookUp}}\xspace}
+\newcommand{\firstException}{\ensuremath{\ttt{firstException}}\xspace}
+\newcommand{\catchExc}{\ensuremath{\ttt{evalExps}}\xspace}
+\newcommand{\catchExcRec}{\ensuremath{\ttt{evalExpsR}}\xspace}
+\newcommand{\append}{\ensuremath{\ttt{append}}\xspace}
+\newcommand{\repeatFun}{\ensuremath{\ttt{repeat}}\xspace}
+\newcommand{\params}{\ensuremath{\ttt{params}}\xspace}
+\newcommand{\take}{\ensuremath{\ttt{take}}\xspace}
+\newcommand{\length}{\ensuremath{\ttt{length}}\xspace}
+\newcommand{\charAt}{\ensuremath{\ttt{charAt}}\xspace}
+\newcommand{\typeOf}{\ensuremath{\ttt{typeOf}}\xspace}
+\newcommand{\numToString}{\ensuremath{\ttt{numToString}}\xspace}
+\newcommand{\stringToNum}{\ensuremath{\ttt{stringToNum}}\xspace}
+\newcommand{\hasOwnProperty}{\ensuremath{\ttt{hasOwnProperty}}\xspace}
+
+\newcommandx{\ceRetvalTwo}[3][1=v_1, 2=v_2, 3=\store_{ce}]{\pair{\listtwo[#1][#2]}{#3}}
+\newcommandx{\ceRetvalThree}[4][1=v_1, 2=v_2, 3=v_3, 4=\store_{ce}]{
+   \pair{\listthree[#1][#2][#3]}{#4}}
+\newcommand{\first}{\ensuremath{\ttt{first}}\xspace}
+\newcommand{\rest}{\ensuremath{\ttt{rest}}\xspace}
+\newcommand{\last}{\ensuremath{\ttt{last}}\xspace}
+\newcommand{\head}{\ensuremath{\ttt{head}}\xspace}
+\newcommand{\lastExc}[2]{\assign{\pair{j}{#2}}{#1}}
+\newcommand{\updateObj}{\ensuremath{\ttt{updateObj}}\xspace}
+\newcommand{\updateObjAddr}{\ensuremath{\ttt{updateObjAddr}}\xspace}
+\newcommand{\foldLeft}{\ensuremath{\ttt{foldLeft}}\xspace}
+\newcommand{\objKeys}{\ensuremath{\ttt{objKeys}}\xspace}
+\newcommand{\objKeysAll}{\ensuremath{\ttt{objKeysAll}}\xspace}
+\newcommand{\recKeys}{\ensuremath{\ttt{recKeys}}\xspace}
+\newcommand{\tryJmpValue}{\ensuremath{\ttt{tryJmpValue}}\xspace}
+\newcommand{\tryExcValue}{\ensuremath{\ttt{tryExcValue}}\xspace}
+\newcommand{\reverse}{\ensuremath{\ttt{reverse}}\xspace}
+\newcommand{\call}{\ensuremath{\ttt{call}}\xspace}
+\newcommand{\accOthValue}{\ensuremath{\ttt{accOthValue}}\xspace}
+\newcommandx{\exc}[1][1=v]{\kw{exc }#1}
+\newcommandx{\jmp}[2][1=l, 2=v]{\kw{jmp }#1\;#2}
+\newcommand{\nil}{\kw{nil}}
+
+\newcommand{\protoExternal}{``\ttt{prototype}"\xspace}
+\newcommand{\protoInternal}{``\ttt{\_\_proto\_\_}"\xspace}
+\newcommand{\key}{``\ttt{key}"\xspace}
+\newcommand{\nextRec}{``\ttt{next}"\xspace}
+
+\newcommand{\truthy}{\ensuremath{\ttt{truthy}}\xspace}
+\newcommand{\falsy}{\ensuremath{\ttt{falsy}}\xspace}
+\newcommand{\parse}{\ensuremath{\ttt{parse}}\xspace}
+
+% misc
+\newcommandx{\TEExc}[1][1=\store_1]{\res[{\exc[\typeError]}][#1]}
+\newcommandx{\listtwo}[2][1=e_1, 2=e_2]{#1\cdot#2}
+\newcommandx{\listthree}[3][1=e_1, 2=e_2, 3=e_3]{#1\cdot#2\cdot#3}
+
+\newcommand{\pair}[2]{\ensuremath{(#1, #2)}}
+\newcommand{\feinput}{\set{\pair{g}{\store}}}
+\newcommand{\ruleBlock}{\vsp\vsp\vsp}
+\newcommand{\subscr}[1]{\textsubscript{#1}}
+\newcommandx{\nth}[1][1=n]{\ensuremath{#1}th\xspace}
+%\newcommand{\assign}[2]{#1 \triangleq #2}
+\newcommand{\assign}[2]{#1 = #2}
+\newcommand{\assignRev}[2]{\assign{#2}{#1}}
+\newcommand{\typeError}{``\mtt{TypeError}"}
+\newcommand{\notImpl}{``\mtt{NotImplemented}"}
+\newcommand{\todo}{\red{TODO:}\xspace}
+\newcommandx{\objectPrototype}[2][1=\env, 2=\store]{#2(#2(#2(#1(\object)))( \protoExternal ))}
+\newcommand{\nullUndef}{\{ \nullv, \undefinedv \}}
+
+\newcommand{\code}[1]{\ensuremath{\mathtt{#1}}\xspace}
+\newcommand{\av}[2]{\ensuremath{\{v_{#1}\ |\ \psi_{#2}(v_{#1})\}}\xspace}
+\newcommand{\pr}[2]{\ensuremath{\psi_{#2}(v_{#1})}\xspace}

@@ -1,0 +1,9 @@
+var x, y, z in
+  z := 2 * x;
+  if (z = x) {
+    if (x != y + 10) {
+      output "I am fine here"
+    } else {
+      output "I should not reach here."
+    }
+  }

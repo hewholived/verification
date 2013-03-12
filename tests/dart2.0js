@@ -1,0 +1,21 @@
+var x, y in
+  
+  x := 0-3;
+  y := x * x * x * x * x * x * x;
+  if (y > 0) {
+    if (x > 0) {
+      if (y = 10) {
+        output "abort1"
+      }
+    } else {
+      output "x is negative, but guard is positive."
+    }
+  } else {
+    if (x > 0) {
+      if (y = 20) {
+        output "abort2"
+      }
+    } else {
+      output "x is negative and guard is negative."
+    }
+  }

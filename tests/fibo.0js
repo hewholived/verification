@@ -1,0 +1,16 @@
+//Find 7th fibonacci number
+var inp, out, val1, val2, tmp in
+  
+  inp := 5;
+  
+  val1 := 1;
+  val2 := 2;
+  
+  while(inp > 0) {
+    tmp := val1 + val2;
+    val1 := val2;
+    val2 := tmp;
+    inp := inp - 1
+  };
+  
+  out := val2

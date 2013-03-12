@@ -1,0 +1,11 @@
+var x, y, z in
+  x := 45;
+  y := 65;
+  z := 37;
+  while (x > 0) {
+    while (y > 0) {
+      z := z + x * y;
+      y := x - 1
+    };
+    x := y - 1
+  }

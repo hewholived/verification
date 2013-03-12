@@ -1,0 +1,13 @@
+var x, y, z in
+ y := 0;
+ x := y + 1;
+
+ if (x > y) {
+   if (z > y) {
+     x := x * z
+   } else {
+     while(z <= y) {
+       z := y + 1
+     }
+   }
+ }

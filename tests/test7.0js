@@ -1,0 +1,29 @@
+var a, b, c, d, e, f, g, h, i, j, k in
+  a := 45;
+  while (a > b) {
+    while (c > d) {
+      while (a > c) {
+        while (b > d) {
+          while (e > f) {
+            while ((g-h) > i) {
+              while (i > j) {
+                while (h > k) {
+                  while (j > a) {
+                    a := 5
+                  }; 
+                  a := 10
+                  
+                }; 
+                  a := 20
+                }
+              }
+            }
+          }
+         }
+        }
+      }
+   
+
+
+
+ 

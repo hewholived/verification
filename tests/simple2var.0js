@@ -1,0 +1,3 @@
+var x, y in
+  x := 0;
+  y := x

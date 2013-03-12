@@ -1,0 +1,7 @@
+We have currently implemented an abstract interpreter that can infer logical qualifiers for all the constructs in \lang with the exception of \textit{while}. 
+We are squashing out bugs and testing the analysis for the remaining constructs. 
+We still need to work out the abstract semantics for \textit{while}, create a good test benchmark, conduct experiments to get insights on performance and precision of our analysis, and then as a nice to have feature, add integer arrays into our language, so that we can infer and verify more interesting properties.
+
+We believe that the abstract interpretation formulation of inferring logical qualifiers is novel, and is a different take on Liquid Types\cite{Rondon2008}. 
+We plan to formalize the abstract interpretation rules and prove soundness and termination. 
+

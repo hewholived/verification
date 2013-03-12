@@ -1,0 +1,56 @@
+\section{Logical Qualifier Inference through Abstract Interpretation}
+
+We infer flow-sensitive logical qualifiers for each variable at each program point by using abstract interpretation.
+In this section, we describe the lattice for concrete collecting semantics, and the lattice for abstract semantics, provide a galois connection between the two, and then provide rules for abstract semantics informally.
+
+\subsection{Abstract domain}
+The lattice for concrete collecting semantics (which provides all possible values an integer variable in \lang could be, at a given program point for a given program) is given by 
+\begin{description}
+\item[Element] A set of integers
+\item[$\top$] Set of all integers
+\item[$\bot$] Empty set
+\item[Partial Ordering] Subset inclusion
+\item[Join] Set union
+\item[Meet] Set intersection
+\item[Equality] Set equality
+\end{description}
+
+The lattice for abstract semantics (the elements of which represent the abstract values over which the abstract semantics computes) is given by:
+\begin{description}
+\item[Element] \av{}{} where \pr{}{} is a logical qualifier for $v$
+\item[$\top$] $\{ v\ |\ \textit{true}\}$
+\item[$\bot$] $\{ v\ |\ \textit{false}\}$
+\item[Partial Ordering] \av{}{1} $\sqsubseteq$ \av{}{2} iff \pr{}{1} $\rightarrow$ \pr{}{2}
+\item[Join] $\av{}{1} \sqcup \av{}{2} = \av{}{3}$ iff $\pr{}{1} \rightarrow \pr{}{3}\ \land\ \pr{}{2} \rightarrow \pr{}{3}$ and there is no $\pr{}{4} \neq \pr{}{3}$ such that $\pr{}{1} \rightarrow \pr{}{4}\ \land\ \pr{}{2} \rightarrow \pr{}{4} \ \land \ \pr{}{4} \rightarrow \pr{}{3}$
+\item[Meet] $\av{}{1} \sqcap \av{}{2} = \av{}{3}$ iff $\pr{}{3} \rightarrow \pr{}{1}\ \land\ \pr{}{3} \rightarrow \pr{}{2}$ and there is no $\pr{}{4} \neq \pr{}{3}$ such that $\pr{}{4} \rightarrow \pr{}{1}\ \land\ \pr{}{4} \rightarrow \pr{}{2} \ \land \ \pr{}{3} \rightarrow \pr{}{4}$
+\item[Equality] $\av{}{1} = \av{}{2}$ iff $\pr{}{1} \leftrightarrow \pr{}{2}$
+\end{description}
+
+Observe that because the abstract values are logical qualifiers (which cannot have disjunctions), when $\av{}{1} = \av{}{2}$, they must be syntactically equivalent too.
+
+\newtheorem{theorem}{Theorem}
+\begin{theorem}
+\label{theo:join}
+\emph{(Unique Join)} The join of any two elements $\av{}{1}$ and $\av{}{2}$ is unique. 
+\end{theorem}
+\begin{proof}
+Let us assume that there are two distinct joins for elements $\av{}{1}$ and $\av{}{2}$.
+Let they be $\av{}{3}$ and $\av{}{4}$.
+By applying the definition of $\av{}{1} \sqcup \av{}{2}$, to each of these, and using the fact that they are distinct, we get, $\pr{}{1} \rightarrow \pr{}{3}\ \land\ \pr{}{2} \rightarrow \pr{}{3}\ \land\ \pr{}{4} \neq \pr{}{3}\ \land\ \pr{}{3} \centernot\rightarrow \pr{}{4}\ \land\ \pr{}{1} \rightarrow \pr{}{4}\ \land\ \pr{}{2} \rightarrow \pr{}{4}\ \land\ \pr{}{4} \centernot\rightarrow \pr{}{3}$.
+But this is unsatisfiable (can be verified by writing the truth table or feeding to a theorem solver). 
+Thus, the assumption we made, that there are two distinct joins must be incorrect.
+Therefore, the join of any two elements $\av{}{1}$ and $\av{}{2}$ is unique.
+\end{proof}
+
+Using Theorem~\ref{theo:join}, we can confirm that definition of the abstraction lattice we provide is indeed a lattice.
+
+\begin{theorem}
+\label{theo:galois}
+\emph{(Galois connection)}
+There exists a galois connection between the concrete lattice and abstract lattice defined above.
+\end{theorem}
+\begin{proof}
+Let the abstraction function $\alpha$ be given by $\alpha(I) = \av{}{1}$ where $I \subseteq \mathbb{Z}$ and $\forall i \in I, \psi_1(i)$ is true and there is no $\av{}{2}$ such that $\pr{}{2} \rightarrow \pr{}{1}$ and $\forall i \in I, \psi_2(i)$ is true.
+Let the concretization function $\gamma$ be given by $\gamma(\av{}{})$ = $\{ i \ |\ i \in \mathbb{Z} \land \psi(i) \}$.
+Using these, we can see that there exists a galois connection between the concrete and the abstract lattice.
+\end{proof}

@@ -1,0 +1,7 @@
+var x, y in
+
+  x := y + 1;
+  
+  while(x > y) {
+    x := y - 1
+  }

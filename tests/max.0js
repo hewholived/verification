@@ -1,0 +1,8 @@
+var x, y, mymax in
+  if (x > y) {
+    x := y + 1;
+    mymax := x + 1
+  } else {
+    y := y + 1;
+    mymax := y + 2
+  }

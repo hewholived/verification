@@ -1,0 +1,31 @@
+var a, b, c, d, e, f, g, h, i, j, k in
+  if (a > b) {
+    if (c > d) {
+      if (a > c) {
+        if (b > d) {
+          if (e > f) {
+            if ((g-h) > i) {
+              if (i > j) {
+                if (h > k) {
+                  if (j > a) {
+                    a := 5
+                  } else {
+                  a := 10
+                  }
+                } else {
+                  a := 20
+                }
+              }
+            }
+          }
+         }
+        }
+      };
+    a := 30
+   } else {
+     a := 14
+   }
+
+
+
+ 

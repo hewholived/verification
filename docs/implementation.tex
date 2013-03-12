@@ -1,0 +1,17 @@
+\section{Implementation}
+We implement our abstract interpreter in \emph{Scala} programming language. Scala is a JVM based multi-paradigm language which compiles down to Java class files. Therefore, our tool can run on any machine that has JVM and Z3 installed in it. We use \emph{ScalaZ3}\cite{ScalaZ3}, Scala binding for the \emph{Z3} theorem prover, in our tool for solving constraints. We also require \emph{GMP}, GNU Multiple Precision Arithmetic Library installed in our system as an added dependency for Z3.
+\paragraph{Constraint Language: CL}
+We came up with a constraint language, CL that can easily interface with Z3 theorem prover. Our constraint language abstract syntax is described in Figure ~\ref{fig:cl}. To prove $\alpha \implies \beta$, we first see whether $\neg(\alpha \implies \beta)$ is satisfiable for any set of assignments of value to variables in $\alpha$ or $\beta$. If it is, we infer that $\alpha \implies \beta$ is false, if not it is true.
+\begin{figure}
+  \begin{align*}
+    a \in \textit{AExp} &::= n \alt x \alt a_1 \bop a_2
+    \\
+    b \in \textit{BExp} &::= \true \alt \false \alt b_1 \otimes b_2 \alt a_1 \ominus a_2 \alt \textit{!b}
+    \\
+    \bop \in \textit{ABinOp} &::= + \alt - \alt \times\\
+    \otimes \in \textit{BBinOp} &::= \logand \alt \logor \alt \implies\\
+    \ominus \in \textit{ACompOp} &::=\ < \alt \leq \alt > \alt \geq \alt \equiv \alt \neq
+  \end{align*}
+\caption{Abstract syntax of CL}
+\label{fig:cl}
+\end{figure}

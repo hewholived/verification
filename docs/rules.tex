@@ -1,0 +1,118 @@
+\subsection{Abstract semantics}
+\begin{description}
+
+
+\item[Let block rule:]
+Initialize the abstract values of all the variables introduced in the let block to the least precise value \ensuremath{\top}, i.e. \ensuremath{\{v\ |\ \true\}} and update the store with these mappings. Update \marketplace with the new set of logical qualifiers corresponding to each of the newly introduced variables.
+
+
+\item[Constant rule:]
+Any constant integer \textit{i} has an abstract value \ensuremath{\{v\ |\ v=i\}}.
+
+
+\item[Variable rule:]
+Lookup most recent abstract value of the variable from the store.
+
+
+\item[Assign rule:]
+For any assignment of the form \ensuremath{x := e}\ first evaluate \textit{e} to an abstract value \av{}{}. Then refine the abstract value of variable \textit{x} using the following algorithm.
+\begin{enumerate}
+\item
+Assume \ensuremath{\alpha} equals $(x_{new} = v) \wedge \pr{}{} \wedge \EA$, where $x_{new}$ is a unique variable name associated with \textit{x} at the given program location and \EA is the assumption that is made in the environment.
+\item
+For each logical qualifier \ensuremath{\beta} in \marketplace, check whether \ensuremath{\alpha \implies \beta[v\mapsto x_{new}]} is valid and filter out the ones that invalidate the formula into a set $\Sigma$. Filter out a set of logical qualifiers $\Lambda$ which contain the relationship between old values of $x$, $x_{old}$ with $x_{new}$.
+\item
+Create a new abstract value \av{1}{1} for \textit{x}, where \pr{1}{1} is the conjunction of all the logical qualifiers in $\Sigma - \Lambda$. Update the store with this new value.
+\item
+Update the values of variables in the store which depended on $x_{old}$ using the relations in $\Lambda$.
+\item
+Check the validity of \EA using the constraints in $\Sigma$. If \EA is invalid, replace it with \true.
+\end{enumerate}
+
+
+\item[Binary operator rule:]
+For any binary operation of the form \ensuremath{e_1 \bop e_2}, evaluate $e_1$ and $e_2$ to \av{1}{1} and \av{2}{2}. Create a new abstract value \av{3}{3} using the following algorithm.
+\begin{enumerate}
+\item
+Assume $\alpha$ equals $\pr{1}{1} \logand \pr{2}{2} \logand (v_3 = v_1 \bop v_2)$.
+\item
+For each logical qualifier \ensuremath{\beta} in \marketplace, check whether \ensuremath{\alpha \implies \beta[v\mapsto v_3]} is valid and filter out the ones that invalidate the formula into a set $\Sigma$.
+\item
+Create a new abstract value \av{3}{3}, where $v_3$ is fresh variable name, \pr{3}{3} is the conjunction of all the logical qualifiers in $\Sigma$.
+\end{enumerate}
+
+
+\item[If rule:] 
+For an \kw{if} expression of the format \cond , use the following algorithm to evaluate it. We assume that $e_1$ is of the form $\textit{lexp} \odot \textit{rexp}$.
+\begin{enumerate}
+\item
+Evaluate \textit{lexp} and \textit{rexp} to abstract values \av{1}{1} and \av{2}{2}.
+\item
+Let\\ 
+$\textit{cond} := \pr{1}{1} \logand \pr{2}{2} \logand \EA$ \\
+$\textit{isTrue} := \kw{sat?}((v_1 \odot v_2) \logand cond)$ \\
+$\textit{isTrue} := \kw{sat?}(!(v_1 \odot v_2) \logand cond)$ \\
+\\
+where \kw{sat?} is a function that tests the satisfiability of a given expression.
+\item
+Obtain new stores $\store_t$ and $\store_f$ by evaluating $e_2$ and $e_3$ as follows.\\
+$\store_t := \kw{eval}(e_2, \store, \EA\ \kw{extend}\ ((v_1 \odot v_2) \logand cond))$\\
+$\store_f := \kw{eval}(e_3, \store, \EA\ \kw{extend}\ (!(v_1 \odot v_2) \logand cond))$
+\item
+Obtain $\store_1$ and $\store_2$ using the formula \\
+$\store_1 := \textit{isTrue}\ ?\ \store_t\ :\ \store_f$\\
+$\store_2 := \textit{isFalse}\ ?\ \store_f\ :\ \store_t$
+\item
+Obtain the final store by merging $\store_1$ and $\store_2$\\
+$\store_{final} := \store_1 \bigsqcup\ \store_2 $
+\end{enumerate}
+
+
+\item[While rule:] 
+For a \kw{while} expression of the format \while , use the following algorithm to evaluate it. We assume that $e_1$ is of the form $\textit{lexp} \odot \textit{rexp}$. Let $\store_s = \store_1 = \store_2$ be the current store. 
+\begin{enumerate}
+\item
+$\store_s = \store_1 \bigsqcup \store_2$
+\item
+Evaluate \textit{lexp} and \textit{rexp} to abstract values \av{1}{1} and \av{2}{2}.
+\item
+Let\\ 
+$\textit{cond} := \pr{1}{1} \logand \pr{2}{2} \logand \EA$ \\
+$\textit{isTrue} := \kw{sat?}((v_1 \odot v_2) \logand cond)$ \\
+$\textit{isTrue} := \kw{sat?}(!(v_1 \odot v_2) \logand cond)$ \\
+\\
+where \kw{sat?} is a function that tests the satisfiability of a given expression.
+\item
+Obtain new stores $\store_b$ by evaluating $e_2$ as follows.\\
+$\store_b := \kw{eval}(e_2, \store, \EA\ \kw{extend}\ ((v_1 \odot v_2) \logand cond))$
+\item
+Obtain $\store_1$ and $\store_2$ using the formulae \\
+$\store_1 := \textit{isTrue}\ ?\ \store_b\ :\ \store_s$\\
+$\store_2 := \textit{isFalse}\ ?\ \store_s\ :\ \store_b$
+\item
+If $(\store_1 \bigsqcup \store_2) \neq \store_s$; goto 1. Else we have reached a fixpoint.
+\item
+Re-evaluate $e_1$ in $\store_s$ and get the predicate $\textit{fPred} = !(v_1 \odot v_2) \logand cond$. Extend \EA with \textit{fPred}.
+\end{enumerate}
+\end{description}
+
+\section{A Simple Theory for Multiplication}
+Modern day SMT solvers do not handle non-linear arithmetic on variables well. To solve this problem, we decided to encode a theory for multiplication in our toolkit. Since the set of logical qualifiers we deal with is limited, we were able to come up with a fixed set of rules that produce a sound abstract value of a product. We calculate the product of two abstract values \av{1}{1} and \av{2}{2} using the following rules.\\\\
+$\textit{case}\ (v_1 = 0 \logor v_2 = 0):\ \{v_3\ |\ v_3 = 0\}$\\
+$\textit{case}\ \av{1}{1} = \av{2}{2}:\ \{v_3\ |\ (v_3 > 0) \logand (v_3 \ge v_1)\}$\\
+$\textit{case}\ (v_1 > 0 \logand v_2 > 0):\ \{v_3\ |\ (v_3 > 0) \logand (v_3 \ge v_1) \logand (v_3 \ge v_2)\}$\\
+$\textit{case}\ (v_1 > 0 \logand v_2 < 0):\ \{v_3\ |\ (v_3 < 0) \logand (v_3 < v_1) \logand (v_3 \le v_2)\}$\\
+$\textit{case}\ (v_1 < 0 \logand v_2 > 0):\ \{v_3\ |\ (v_3 < 0) \logand (v_3 \le v_1) \logand (v_3 < v_2)\}$\\
+$\textit{case}\ (v_1 > 0 \logand v_2 \ge 0):\ \{v_3\ |\ (v_3 \ge 0) \logand (v_3 \ge v_2)\}$\\
+$\textit{case}\ (v_1 > 0 \logand v_2 \le 0):\ \{v_3\ |\ (v_3 \le 0) \logand (v_3 < v_1) \logand (v_3 \le v_2)\}$\\
+$\textit{case}\ (v_1 < 0 \logand v_2 \ge 0):\ \{v_3\ |\ (v_3 \le 0) \logand (v_3 \le v_2)\}$\\
+$\textit{case}\ (v_1 < 0 \logand v_2 \le 0):\ \{v_3\ |\ (v_3 \ge 0) \logand (v_3 > v_1) \logand (v_3 \ge v_2)\}$\\
+$\textit{case}\ (v_1 \ge 0 \logand v_2 > 0):\ \{v_3\ |\ (v_3 \ge 0) \logand (v_3 \ge v_1)\}$\\
+$\textit{case}\ (v_1 \ge 0 \logand v_2 < 0):\ \{v_3\ |\ (v_3 \le 0) \logand (v_3 \le v_1)\}$\\
+$\textit{case}\ (v_1 \le 0 \logand v_2 > 0):\ \{v_3\ |\ (v_3 \le 0) \logand (v_3 \le v_1) \logand (v_3 < v_2)\}$\\
+$\textit{case}\ (v_1 \le 0 \logand v_2 < 0):\ \{v_3\ |\ (v_3 \ge 0) \logand (v_3 \ge v_1) \logand (v_3 > v_2)\}$\\
+$\textit{case}\ (v_1 \ge 0 \logand v_2 \ge 0):\ \{v_3\ |\ (v_3 \ge 0) \logand (v_3 \ge v_1) \logand (v_3 \ge v_2)\}$\\
+$\textit{case}\ (v_1 \ge 0 \logand v_2 \le 0):\ \{v_3\ |\ (v_3 \le 0) \logand (v_3 \le v_1)\}$\\
+$\textit{case}\ (v_1 \le 0 \logand v_2 \ge 0):\ \{v_3\ |\ (v_3 \le 0) \logand (v_3 \le v_2)\}$\\
+$\textit{case}\ (v_1 \le 0 \logand v_2 \le 0):\ \{v_3\ |\ (v_3 \ge 0) \logand (v_3 \ge v_1) \logand (v_3 \ge v_2)\}$\\
+$\textit{default} : \{v_3\ |\ \true\}$

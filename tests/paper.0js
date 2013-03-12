@@ -1,0 +1,16 @@
+var sum, p, final in
+  sum := 0;
+  p := 10;
+  
+  while (0 < p) {
+    sum := sum + (p + p);
+    p := p - 1
+  };
+  
+  final := sum - p;
+  assert(p = 0);
+  assert(sum > 0);
+  assert(sum > p);
+  assert(final >= sum);
+  assert(final > 0);
+  assert(final > p)

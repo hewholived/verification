@@ -1,0 +1,23 @@
+\section{The Language \lang}
+
+Our tool works on programs written in \lang.
+Figure~\ref{fig:syntax} describes the abstract syntax of the language.
+\lang is an imperative language which has integers, variables, sequencing, \code{var} block for introducing new variables in a scope, binary operators (+, - and \ensuremath{\times}), assignment statements and \code{if} and \code{while} as control flow constructs. 
+The language restricts the conditionals in the guards of \code{if} and \code{while} to conditional expressions (\textit{Cond}), which use the relational operators ($\odot$).
+
+\begin{figure}
+\centering
+  \begin{align*}
+    e \in \Exp &::= n \alt x \alt e_1 \bop e_2
+    \\
+    ce \in \textit{Cond} &::= e_1 \odot e_2
+    \\
+    c \in \textit{Cmd} &::= \seq \alt \block \alt \cond[ce][e_t][e_f] \alt \while[ce][e] \alt x := e 
+    \\
+    \bop \in \BinOp &::= + \alt - \alt \times
+    \\
+    \odot \in \textit{RelOp} &::=\ > \alt < \alt = \alt >= \alt <= \alt !=
+  \end{align*}
+\caption{Abstract syntax of \lang}
+\label{fig:syntax}
+\end{figure}
